@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2019 the original author or authors.
+ * Copyright 2012-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
@@ -34,6 +35,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.boot.devtools.restart.classloader.ClassLoaderFile.Kind;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StreamUtils;
@@ -125,13 +127,13 @@ class RestartClassLoaderTests {
 
 	@Test
 	void loadClassFromReloadableUrl() throws Exception {
-		Class<?> loaded = this.reloadClassLoader.loadClass(PACKAGE + ".Sample");
+		Class<?> loaded = Class.forName(PACKAGE + ".Sample", false, this.reloadClassLoader);
 		assertThat(loaded.getClassLoader()).isEqualTo(this.reloadClassLoader);
 	}
 
 	@Test
 	void loadClassFromParent() throws Exception {
-		Class<?> loaded = this.reloadClassLoader.loadClass(PACKAGE + ".SampleParent");
+		Class<?> loaded = Class.forName(PACKAGE + ".SampleParent", false, this.reloadClassLoader);
 		assertThat(loaded.getClassLoader()).isEqualTo(getClass().getClassLoader());
 	}
 
@@ -180,7 +182,7 @@ class RestartClassLoaderTests {
 		String name = PACKAGE_PATH + "/Sample.class";
 		this.updatedFiles.addFile(name, new ClassLoaderFile(Kind.DELETED, null));
 		assertThatExceptionOfType(ClassNotFoundException.class)
-				.isThrownBy(() -> this.reloadClassLoader.loadClass(PACKAGE + ".Sample"));
+				.isThrownBy(() -> Class.forName(PACKAGE + ".Sample", false, this.reloadClassLoader));
 	}
 
 	@Test
@@ -188,7 +190,7 @@ class RestartClassLoaderTests {
 		String name = PACKAGE_PATH + "/Sample.class";
 		this.updatedFiles.addFile(name, new ClassLoaderFile(Kind.MODIFIED, new byte[10]));
 		assertThatExceptionOfType(ClassFormatError.class)
-				.isThrownBy(() -> this.reloadClassLoader.loadClass(PACKAGE + ".Sample"));
+				.isThrownBy(() -> Class.forName(PACKAGE + ".Sample", false, this.reloadClassLoader));
 	}
 
 	@Test
@@ -196,8 +198,16 @@ class RestartClassLoaderTests {
 		String name = PACKAGE_PATH + "/SampleParent.class";
 		byte[] bytes = FileCopyUtils.copyToByteArray(getClass().getResourceAsStream("SampleParent.class"));
 		this.updatedFiles.addFile(name, new ClassLoaderFile(Kind.ADDED, bytes));
-		Class<?> loaded = this.reloadClassLoader.loadClass(PACKAGE + ".SampleParent");
+		Class<?> loaded = Class.forName(PACKAGE + ".SampleParent", false, this.reloadClassLoader);
 		assertThat(loaded.getClassLoader()).isEqualTo(this.reloadClassLoader);
+	}
+
+	@Test
+	void proxyOnClassFromSystemClassLoaderDoesNotYieldWarning() {
+		ProxyFactory pf = new ProxyFactory(new HashMap<>());
+		pf.setProxyTargetClass(true);
+		pf.getProxy(this.reloadClassLoader);
+		// Warning would happen outside the boundary of the test
 	}
 
 	private String readString(InputStream in) throws IOException {
