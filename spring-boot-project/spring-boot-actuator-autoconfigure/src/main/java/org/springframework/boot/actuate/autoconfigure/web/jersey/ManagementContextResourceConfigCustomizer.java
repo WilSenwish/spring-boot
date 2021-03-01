@@ -14,24 +14,23 @@
  * limitations under the License.
  */
 
-package org.springframework.boot.autoconfigure.influx;
+package org.springframework.boot.actuate.autoconfigure.web.jersey;
 
-import org.influxdb.InfluxDB;
+import org.glassfish.jersey.server.ResourceConfig;
 
 /**
- * Callback interface that can be implemented by beans wishing to further customize
- * {@code InfluxDB} whilst retaining default auto-configuration.
+ * Callback interface that can be implemented by beans wishing to customize Jersey's
+ * {@link ResourceConfig} in the management context before it is used.
  *
- * @author Eddú Meléndez
- * @since 2.5.0
+ * @author Andy Wilkinson
+ * @since 2.3.10
  */
-@FunctionalInterface
-public interface InfluxDbCustomizer {
+public interface ManagementContextResourceConfigCustomizer {
 
 	/**
-	 * Customize the {@link InfluxDB}.
-	 * @param influxDb the InfluxDB instance to customize
+	 * Customize the resource config.
+	 * @param config the {@link ResourceConfig} to customize
 	 */
-	void customize(InfluxDB influxDb);
+	void customize(ResourceConfig config);
 
 }

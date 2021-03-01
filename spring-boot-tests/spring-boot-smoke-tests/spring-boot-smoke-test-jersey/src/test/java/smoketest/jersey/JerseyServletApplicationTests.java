@@ -14,24 +14,13 @@
  * limitations under the License.
  */
 
-package org.springframework.boot.autoconfigure.influx;
-
-import org.influxdb.InfluxDB;
+package smoketest.jersey;
 
 /**
- * Callback interface that can be implemented by beans wishing to further customize
- * {@code InfluxDB} whilst retaining default auto-configuration.
+ * Smoke tests for Jersey configured as a Servlet.
  *
- * @author Eddú Meléndez
- * @since 2.5.0
+ * @author Andy Wilkinson
  */
-@FunctionalInterface
-public interface InfluxDbCustomizer {
-
-	/**
-	 * Customize the {@link InfluxDB}.
-	 * @param influxDb the InfluxDB instance to customize
-	 */
-	void customize(InfluxDB influxDb);
+class JerseyServletApplicationTests extends AbstractJerseyApplicationTests {
 
 }

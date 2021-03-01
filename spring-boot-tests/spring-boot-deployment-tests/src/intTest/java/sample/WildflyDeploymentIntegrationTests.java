@@ -14,24 +14,26 @@
  * limitations under the License.
  */
 
-package org.springframework.boot.autoconfigure.influx;
+package sample;
 
-import org.influxdb.InfluxDB;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
- * Callback interface that can be implemented by beans wishing to further customize
- * {@code InfluxDB} whilst retaining default auto-configuration.
+ * Deployment integration tests for Wildfly.
  *
- * @author Eddú Meléndez
- * @since 2.5.0
+ * @author Christoph Dreis
  */
-@FunctionalInterface
-public interface InfluxDbCustomizer {
+@Testcontainers(disabledWithoutDocker = true)
+public class WildflyDeploymentIntegrationTests extends AbstractDeploymentIntegrationTests {
 
-	/**
-	 * Customize the {@link InfluxDB}.
-	 * @param influxDb the InfluxDB instance to customize
-	 */
-	void customize(InfluxDB influxDb);
+	@Container
+	static WarDeploymentContainer container = new WarDeploymentContainer("jboss/wildfly:20.0.1.Final",
+			"/opt/jboss/wildfly/standalone/deployments", DEFAULT_PORT);
+
+	@Override
+	WarDeploymentContainer getContainer() {
+		return container;
+	}
 
 }
