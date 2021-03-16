@@ -14,22 +14,18 @@
  * limitations under the License.
  */
 
-package org.springframework.boot.docs.springbootfeatures.webapplications;
+package org.springframework.boot.docs.springbootfeatures.webapplications.embeddedservletcontainer;
 
-// tag::code[]
-import java.time.Duration;
-
-import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
 import org.springframework.boot.web.server.WebServerFactoryCustomizer;
+import org.springframework.boot.web.servlet.server.ConfigurableServletWebServerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
-public class TomcatServerCustomizer implements WebServerFactoryCustomizer<TomcatServletWebServerFactory> {
+public class CustomizationBean implements WebServerFactoryCustomizer<ConfigurableServletWebServerFactory> {
 
 	@Override
-	public void customize(TomcatServletWebServerFactory server) {
-		server.addConnectorCustomizers((connector) -> connector.setAsyncTimeout(Duration.ofSeconds(20).toMillis()));
+	public void customize(ConfigurableServletWebServerFactory server) {
+		server.setPort(9000);
 	}
 
 }
-// end::code[]
